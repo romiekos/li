@@ -46,7 +46,12 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "extendInfo": {
+        "NSAppleEventsUsageDescription": "Li uses System Events to copy your selected text and paste the rewritten result back.",
+        "NSAccessibilityUsageDescription": "Li needs Accessibility access to listen for the global hotkeys you configure.",
+        "LSUIElement": true
+      }
     },
     "dmg": {
       "title": "Li",
