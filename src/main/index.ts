@@ -170,15 +170,6 @@ function createDockIconPng(size: number): string {
   });
 }
 
-function logoSvgUrl(size: number, fill: string, bg?: string): string {
-  const paths =
-    `<path d="M48 16V24H40V16H48ZM48 32V40H56V48H40V40H32V32H48Z" fill="${fill}"/>` +
-    `<path d="M16 16V40H32V48H8V16H16Z" fill="${fill}"/>`;
-  const bgRect = bg ? `<rect width="63" height="63" rx="11" fill="${bg}"/>` : '';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 63 63" fill="none">${bgRect}${paths}</svg>`;
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-}
-
 function createTrayIcon(): Electron.NativeImage {
   if (process.platform === 'darwin') {
     // macOS requires a real PNG for template images — SVG data URLs aren't supported
@@ -189,8 +180,12 @@ function createTrayIcon(): Electron.NativeImage {
     return image;
   }
 
-  // Windows / Linux: Chromium handles SVG data URLs fine.
-  return nativeImage.createFromDataURL(logoSvgUrl(32, '#c6ff6b', '#050608'));
+  // Windows / Linux: the tray needs an HICON-backed bitmap; SVG data URLs
+  // render as a blank slot in the notification area. Reuse the dock-icon
+  // bitmap (logo on dark rounded square) so it's visible on light + dark taskbars.
+  const image = nativeImage.createFromDataURL(createDockIconPng(16));
+  image.addRepresentation({ scaleFactor: 2, dataURL: createDockIconPng(32) });
+  return image;
 }
 
 function loadRenderer(window: BrowserWindow, hash: string): void {

@@ -18,12 +18,22 @@ type StoredSettings = Omit<LiSettings, ApiKeyField> &
   Partial<Record<ApiKeyField, string>> &
   Partial<Record<`${ApiKeyField}Encrypted`, string>>;
 
-const defaultHotkeys: HotkeySettings = {
-  grammar: 'Command+Control+G',
-  rephrase: 'Command+Control+R',
-  translate: 'Command+Control+T',
-  popup: 'Command+Control+P'
-};
+// Electron's `Command` accelerator is mac-only; on Win/Linux registration
+// silently fails. Use Ctrl+Alt as the two-modifier analog elsewhere.
+const defaultHotkeys: HotkeySettings =
+  process.platform === 'darwin'
+    ? {
+        grammar: 'Command+Control+G',
+        rephrase: 'Command+Control+R',
+        translate: 'Command+Control+T',
+        popup: 'Command+Control+P'
+      }
+    : {
+        grammar: 'Control+Alt+G',
+        rephrase: 'Control+Alt+R',
+        translate: 'Control+Alt+T',
+        popup: 'Control+Alt+P'
+      };
 
 const defaultUsageStats: UsageStats = {
   rewriteCount: 0,

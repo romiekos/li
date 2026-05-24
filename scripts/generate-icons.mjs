@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * Generates build/icon.icns (macOS app icon) from the Li logo rects.
+ * Generates app icons from the Li logo rects:
+ *   build/icon.ico   — always (pure Node, cross-platform)
+ *   build/icon.icns  — macOS only (uses `iconutil`)
+ *
  * Run once before building: node scripts/generate-icons.mjs
- * Requires macOS (uses `iconutil`).
  */
 
 import { deflateSync } from 'node:zlib';
@@ -100,30 +102,68 @@ function makePng(size) {
   ]);
 }
 
-// ── Write iconset ─────────────────────────────────────────────────────────
-const iconsetDir = join(ROOT, 'build', 'icon.iconset');
-mkdirSync(iconsetDir, { recursive: true });
+mkdirSync(join(ROOT, 'build'), { recursive: true });
 
-// macOS requires exactly these filenames
-const SIZES = [
-  [16,   'icon_16x16.png'],
-  [32,   'icon_16x16@2x.png'],
-  [32,   'icon_32x32.png'],
-  [64,   'icon_32x32@2x.png'],
-  [128,  'icon_128x128.png'],
-  [256,  'icon_128x128@2x.png'],
-  [256,  'icon_256x256.png'],
-  [512,  'icon_256x256@2x.png'],
-  [512,  'icon_512x512.png'],
-  [1024, 'icon_512x512@2x.png'],
-];
+// ── Write build/icon.ico (Windows) ────────────────────────────────────────
+// ICO container = ICONDIR header + N ICONDIRENTRYs + N image blobs.
+// PNGs embedded inside ICO are supported on Vista+ (electron-builder requires this).
+const ICO_SIZES = [16, 32, 48, 64, 128, 256];
 
-for (const [size, name] of SIZES) {
-  writeFileSync(join(iconsetDir, name), makePng(size));
-  console.log(`  ✓  ${name.padEnd(26)} ${size}×${size}`);
+const icoImages = ICO_SIZES.map((size) => ({ size, png: makePng(size) }));
+
+const iconDir = Buffer.alloc(6);
+iconDir.writeUInt16LE(0, 0);              // reserved
+iconDir.writeUInt16LE(1, 2);              // type = 1 (icon)
+iconDir.writeUInt16LE(icoImages.length, 4); // image count
+
+const entries = Buffer.alloc(16 * icoImages.length);
+let imageOffset = iconDir.length + entries.length;
+for (let i = 0; i < icoImages.length; i++) {
+  const { size, png } = icoImages[i];
+  const off = i * 16;
+  entries[off + 0] = size >= 256 ? 0 : size;     // width  (0 means 256)
+  entries[off + 1] = size >= 256 ? 0 : size;     // height (0 means 256)
+  entries[off + 2] = 0;                          // colour palette count
+  entries[off + 3] = 0;                          // reserved
+  entries.writeUInt16LE(1,  off + 4);            // colour planes
+  entries.writeUInt16LE(32, off + 6);            // bits per pixel
+  entries.writeUInt32LE(png.length, off + 8);    // bytes in image data
+  entries.writeUInt32LE(imageOffset, off + 12);  // offset to image data
+  imageOffset += png.length;
 }
 
-// ── Convert to .icns ──────────────────────────────────────────────────────
-const icnsPath = join(ROOT, 'build', 'icon.icns');
-execSync(`iconutil -c icns "${iconsetDir}" -o "${icnsPath}"`);
-console.log(`\n  ✓  build/icon.icns ready`);
+const ico = Buffer.concat([iconDir, entries, ...icoImages.map((i) => i.png)]);
+const icoPath = join(ROOT, 'build', 'icon.ico');
+writeFileSync(icoPath, ico);
+console.log(`  ✓  build/icon.ico            ${ICO_SIZES.join(', ')}`);
+
+// ── Write build/icon.icns (macOS only) ────────────────────────────────────
+if (process.platform === 'darwin') {
+  const iconsetDir = join(ROOT, 'build', 'icon.iconset');
+  mkdirSync(iconsetDir, { recursive: true });
+
+  // macOS requires exactly these filenames
+  const ICNS_SIZES = [
+    [16,   'icon_16x16.png'],
+    [32,   'icon_16x16@2x.png'],
+    [32,   'icon_32x32.png'],
+    [64,   'icon_32x32@2x.png'],
+    [128,  'icon_128x128.png'],
+    [256,  'icon_128x128@2x.png'],
+    [256,  'icon_256x256.png'],
+    [512,  'icon_256x256@2x.png'],
+    [512,  'icon_512x512.png'],
+    [1024, 'icon_512x512@2x.png'],
+  ];
+
+  for (const [size, name] of ICNS_SIZES) {
+    writeFileSync(join(iconsetDir, name), makePng(size));
+    console.log(`  ✓  ${name.padEnd(26)} ${size}×${size}`);
+  }
+
+  const icnsPath = join(ROOT, 'build', 'icon.icns');
+  execSync(`iconutil -c icns "${iconsetDir}" -o "${icnsPath}"`);
+  console.log(`\n  ✓  build/icon.icns ready`);
+} else {
+  console.log('\n  (skipping icon.icns — macOS only)');
+}
