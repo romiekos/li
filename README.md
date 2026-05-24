@@ -51,14 +51,14 @@ All hotkeys are fully customisable in **Settings → Hotkeys**.
 
 ## Supported AI providers
 
-Li is free — you only pay for what you use via your own API key. Fast, cheap models like `gpt-4.1-mini` or `gemini-3.5-flash` cost fractions of a cent per rewrite.
+Li is free — you only pay for what you use via your own API key. Fast, cheap models like `gpt-5.4-mini` or `gemini-3.5-flash` cost fractions of a cent per rewrite.
 
 | Provider | Suggested models |
 |---|---|
-| OpenAI | `gpt-4.1-mini`, `gpt-4.1-nano`, `gpt-4.1`, `o4-mini` |
+| OpenAI | `gpt-5.4-mini`, `gpt-5.4-nano`, `o4-mini` |
 | Anthropic | `claude-haiku-4-5-20251001`, `claude-sonnet-4-6`, `claude-opus-4-7` |
 | Groq | `llama-4-scout-17b-16e-instruct`, `llama-4-maverick-17b-128e-instruct` |
-| OpenRouter | Any model via a single API key (e.g. `openai/gpt-4.1-mini`) |
+| OpenRouter | Any model via a single API key (e.g. `openai/gpt-5.4-mini`) |
 | Gemini | `gemini-3.1-flash-lite`, `gemini-3.5-flash`, `gemini-3.1-pro` |
 | Ollama | Any locally running model (`http://localhost:11434` by default) |
 
