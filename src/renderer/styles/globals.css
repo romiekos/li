@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Dark theme (default) ── */
+:root {
+  --color-ink:   5 6 8;
+  --color-panel: 10 13 18;
+  --color-line:  39 49 63;
+  --color-mist:  216 226 239;   /* primary text */
+  --color-sub:   153 161 172;   /* secondary text  (~70% mist) */
+  --color-dim:   108 114 124;   /* muted/supplemental (~48% mist) */
+  --color-acid:  255 255 255;
+  --color-ember: 255 95 80;
+  --color-cyan:  155 165 180;
+
+  color-scheme: dark;
+  background: transparent;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Light theme ── */
+:root[data-theme="light"] {
+  --color-ink:   244 246 249;
+  --color-panel: 255 255 255;
+  --color-line:  209 217 227;
+  --color-mist:  26 37 53;      /* primary text */
+  --color-sub:   85 96 112;     /* secondary text  (~70% mist on white) */
+  --color-dim:   140 150 164;   /* muted/supplemental (~48% mist on white) */
+  --color-acid:  10 10 12;
+  --color-ember: 195 35 20;
+  --color-cyan:  95 105 120;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: transparent;
+  overflow: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 1px solid rgb(var(--color-acid));
+  outline-offset: 2px;
+}
+
+@layer components {
+  .popup-shell {
+    @apply border border-line bg-ink/95 text-mist shadow-pixel;
+    background-image:
+      linear-gradient(rgb(var(--color-acid) / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--color-cyan) / 0.025) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  .progress-shell {
+    @apply grid h-screen w-screen place-items-center bg-transparent;
+    pointer-events: none;
+  }
+
+  .li-spinner {
+    @apply h-6 w-6 rounded-full;
+    border: 2px solid rgb(var(--color-acid) / 0.18);
+    border-top-color: rgb(var(--color-acid));
+    animation: li-spin 0.7s linear infinite;
+  }
+
+  .li-spinner-done,
+  .li-spinner-error {
+    @apply grid h-5 w-5 place-items-center rounded-full;
+  }
+
+  .li-spinner-done {
+    @apply bg-acid;
+  }
+
+  .li-spinner-error {
+    @apply bg-ember;
+  }
+
+  .settings-shell {
+    @apply bg-ink;
+    background-image:
+      linear-gradient(rgb(var(--color-mist) / 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--color-mist) / 0.018) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  .ascii-mark {
+    @apply border border-acid px-1.5 py-0.5 leading-none text-acid;
+    box-shadow: inset -2px -2px 0 rgb(var(--color-acid) / 0.12);
+  }
+
+  .icon-button {
+    @apply grid h-7 w-7 place-items-center border border-transparent text-dim transition hover:border-line hover:bg-panel hover:text-mist;
+  }
+
+  .command-button {
+    @apply flex h-10 items-center justify-center gap-2 border border-line bg-panel font-mono text-xs uppercase tracking-[0.16em] text-sub transition hover:border-acid hover:text-acid;
+  }
+
+  .tone-scroll {
+    @apply min-h-0 flex-1 overflow-y-auto pr-1;
+    scrollbar-color: rgb(var(--color-acid) / 0.45) transparent;
+    scrollbar-width: thin;
+  }
+
+  .tone-scroll::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .tone-scroll::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-acid) / 0.34);
+    border: 2px solid rgb(var(--color-ink) / 0.95);
+  }
+
+  .tone-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .settings-nav {
+    @apply flex h-10 items-center gap-3 border border-transparent px-3 text-left text-sm text-sub transition hover:border-line hover:bg-panel hover:text-mist;
+  }
+
+  .settings-nav-active {
+    @apply border-acid bg-acid/10 text-acid;
+  }
+
+  .settings-panel {
+    @apply mb-4 border border-line bg-panel/90 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.22)];
+  }
+
+  .field {
+    @apply mb-4 grid gap-1.5 text-sm text-sub;
+  }
+
+  .field > span {
+    @apply font-mono text-xs uppercase tracking-[0.16em] text-sub;
+  }
+
+  .input,
+  .textarea {
+    @apply w-full border border-line bg-ink px-3 py-2.5 text-sm text-mist transition placeholder:text-mist/25 hover:border-mist/40 focus:border-acid;
+  }
+
+  .textarea {
+    @apply resize-y leading-relaxed;
+  }
+
+  .toggle-row {
+    @apply mb-4 flex items-center justify-between gap-4 border border-line/70 bg-ink/70 px-3 py-3;
+  }
+
+  .toggle-row input {
+    @apply h-4 w-4 accent-acid;
+  }
+
+  .primary-button,
+  .secondary-button {
+    @apply inline-flex h-10 items-center gap-2 border px-3 font-mono text-xs uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-45;
+  }
+
+  .primary-button {
+    @apply border-acid bg-acid/10 text-acid hover:bg-acid/20;
+  }
+
+  .secondary-button {
+    @apply border-line bg-panel text-sub hover:border-cyan hover:text-mist;
+  }
+}
+
+@keyframes li-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
